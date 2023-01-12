@@ -27,7 +27,7 @@
 | A4 | I2C Display Interface | Output |
 | A5 | I2C Display Interface | Output |
 ----
-### Front Panel Ribbon Cable
+### Front Panel Interface Ribbon Cable
 | Cable Pin | Signal |
 | --- | --- |
 | 1 | VCC (+5V) |
