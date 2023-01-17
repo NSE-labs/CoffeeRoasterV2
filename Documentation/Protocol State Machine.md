@@ -4,7 +4,7 @@
 
 ```mermaid
   stateDiagram-V2
-      Start --> BetweenMessages
+      [*] --> BetweenMessages
       BetweenMessages --> StartReceived : Semicolon
       BetweenMessages --> UnknownCommand : Not Semicolon
       UnknownCommand --> BetweenMessages
