@@ -17,8 +17,8 @@
 
 // Digital I/O pins we are using
 #define ZERO_CROSSING_DETECT_INPUT 2
-#define MAX6675_GROUND_OUTPUT 3
-#define MAX6675_VCC_OUTPUT 4
+#define DRUM_MOTOR 3
+#define CASE_FAN 4
 #define MAX6675_DO_INPUT 5
 #define MAX6675_CS_OUTPUT 6
 #define MAX6675_CLK_OUTPUT 7
@@ -143,11 +143,11 @@ void setup()
   // start the I2C display interface and put some text on the screen
   initializeDisplay();
    
-  // Set up power and ground to MAX 6675 chip
-  pinMode(MAX6675_VCC_OUTPUT, OUTPUT); 
-  digitalWrite(MAX6675_VCC_OUTPUT, HIGH);
-  pinMode(MAX6675_GROUND_OUTPUT, OUTPUT); 
-  digitalWrite(MAX6675_GROUND_OUTPUT, LOW);
+  // Initialize drum motor and case fan outputs
+  pinMode(DRUM_MOTOR, OUTPUT); 
+  digitalWrite(DRUM_MOTOR, LOW); /* drum motor off */
+  pinMode(CASE_FAN, OUTPUT); 
+  digitalWrite(CASE_FAN, HIGH); /* case fan on */
   
   // Set up the LEDs
   pinMode(ONBOARD_LED_OUTPUT, OUTPUT);
@@ -176,7 +176,7 @@ void setup()
   OCR1B = 0xffff;  // Set the compare registers to their maximum values
   TCNT1 = 0;  //Set the timer count to zero
   TCCR1C = B10000000;  //Force a compare match on comparator A to set the outputs to zero
-  TCCR1C = B01000000;  //Force a compare match on comparator B```````````````````````` to set the outputs to zero
+  TCCR1C = B01000000;  //Force a compare match on comparator B to set the outputs to zero
   TIMSK1 = B00000110;  //Compare A and Compare B interrupts enabled
   pinMode(HEATER_TRIAC_OUTPUT, OUTPUT);  // Set the heater triac trigger pin to output
   pinMode(FAN_TRIAC_OUTPUT, OUTPUT);  // Set the fan triac trigger pin to output
@@ -292,8 +292,7 @@ void loop()
 void handleSerial()
 {
       // This routine is called each time a serial character is available
-      // It runs the serial receive state machine documented on the
-      // NSE website
+      // It runs the serial receive state machine documented in the project documentation
 
       char inByte; // incoming serial byte
       int number;  // decoded number for numeric commands       
