@@ -3,8 +3,8 @@
 |Coffee Roaster Serial Protocol| | | | |
 | | | | | |
 |Commands are sent to the Arduino. Responses come from the Arduino.| | | | |
-|A response is sent after every command.| | | | |
-|A command to set the heater or fan value is ignored and no response is sent if the command mode is Manual| | | | |
+|A response is sent after every command.|| | | | |
+|A command to set the heater or fan value is ignored and no response is sent if the command mode is Manual|| | | | |
 | | | | | |
 | | |Serial  Characters|Description| |
 |Command|Set control mode|:|Start character| |
@@ -85,3 +85,38 @@
 | | |/|End character| |
 | | | | | |
 |Response|Fan Value|See above| | |
+| | | | | |
+|New commands added for V2|
+|Command|Drum motor on/off|:|Start character| |
+| | |>|Set command| |
+| | |+ or -|On(+) or Off(-)| |
+| | |/|End character| |
+| | | | | |
+|Response|Drum motor status|:|Start character| |
+| | |+ or -|On(+) or Off(-)| |
+| | |/|End character| |
+| | | | | |
+|Command|Read drum motor status|:|Start character| |
+| | |?|Read command| |
+| | |D|Drum motor| |
+| | |/|End character| |
+| | | | | |
+|Response|Drum motor status|See above| | |
+| | | | | |
+|Command|Case fan on/off|:|Start character| |
+| | |>|Set command| |
+| | |^ or #|On(^) or Off(#)| |
+| | |/|End character| |
+| | | | | |
+|Response|Case fan status|:|Start character| |
+| | |^ or #|On(^) or Off(#)| |
+| | |/|End character| |
+| | | | | |
+|Command|Read case fan status|:|Start character| |
+| | |?|Read command| |
+| | |A|Case fan|A for Airflow|
+| | |/|End character| |
+| | | | | |
+|Response|Case fan status|See above| | |
+| | | | | |
+| | | | | |
