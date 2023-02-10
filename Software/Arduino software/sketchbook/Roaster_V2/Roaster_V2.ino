@@ -22,8 +22,8 @@
 #define MAX6675_DO_INPUT 5
 #define MAX6675_CS_OUTPUT 6
 #define MAX6675_CLK_OUTPUT 7
-#define FAN_TRIAC_OUTPUT 9
-#define HEATER_TRIAC_OUTPUT 10
+#define HEATER_TRIAC_OUTPUT 9
+#define FAN_TRIAC_OUTPUT 10
 #define MANUAL_LED_OUTPUT 11
 #define COMPUTER_LED_OUTPUT 12
 #define ONBOARD_LED_OUTPUT 13
@@ -96,7 +96,7 @@ long lastTempSampleTime = 0;  // last time the temperature was sampled
 #define DISPLAY_UPDATE_PERIOD 100 // how long between display updates in milliseconds
 long lastDisplayUpdateTime = 0; // last time display was updated
 
-#define TRIGGER_PULSE_COUNT 40  // The triac trigger must stay high for this number of timer1 counts (20 uS)
+#define TRIGGER_PULSE_COUNT 80  // The triac trigger must stay high for this number of timer1 counts (40 uS)
 
 // Map power output (0-100%)to timer counts for triac firing
 unsigned int heaterMap[101] = 

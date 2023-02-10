@@ -13,8 +13,8 @@
 | 6 | MAX 6675 CS | Output |
 | 7 | MAX 6675 CLK | Output |
 | 8 | Open | |
-| 9 | Heater SSC On/Off | Output |
-| 10 | Fan Triac Trigger | Output |
+| 9 | Fan Triac Trigger | Output |
+| 10 | Heater SSR On/OFF | Output |
 | 11 | Front Panel LED - Manual | Output |
 | 12 | Front Panel LED - Computer | Output |
 | 13 | On-board LED | Output |
