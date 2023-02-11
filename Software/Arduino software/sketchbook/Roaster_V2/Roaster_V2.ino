@@ -1,7 +1,7 @@
 
 // NSE Coffee Roaster code for the Arduino Uno
 // 2011 NSE Labs
-// Version 2 2022 NSE Labs
+// Version 2 2023 NSE Labs
 // This code is in the public domain - feel free to use as you see fit
 //
 // MAX 6675 library is the Adafruit version available in Manage Libraries in the Arduino IDE
