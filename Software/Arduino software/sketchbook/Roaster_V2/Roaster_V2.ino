@@ -44,6 +44,15 @@ double temperature = 0; // Roaster temperature degrees C
 int heater = 0;  // Roaster heater output 0-100%
 int fan = 0;     // Roaster fan output 0-100%
 //********************************************************************
+// We can also turn these values on/off
+//********************************************************************
+enum OnOff {
+  on = 1,
+  off =0
+};
+
+OnOff drumMotor = off;
+OnOff caseFan = on;
 
 
 // The control mode can be manual or computer. In manual
@@ -79,7 +88,11 @@ enum command {
   setHeater,
   readHeater,
   setFan,
-  readFan
+  readFan,
+  setDrum,
+  readDrum,
+  setCaseFan,
+  readCaseFan
 } rcvCommand = unknown;
 
 // temporary storage during numeric commands
@@ -143,11 +156,11 @@ void setup()
   // start the I2C display interface and put some text on the screen
   initializeDisplay();
    
-  // Initialize drum motor and case fan outputs
+  // Initialize drum motor and case fan outputs - NOTE: they are active low
   pinMode(DRUM_MOTOR, OUTPUT); 
-  digitalWrite(DRUM_MOTOR, LOW); /* drum motor off */
+  digitalWrite(DRUM_MOTOR, HIGH); /* drum motor off */
   pinMode(CASE_FAN, OUTPUT); 
-  digitalWrite(CASE_FAN, HIGH); /* case fan on */
+  digitalWrite(CASE_FAN, LOW); /* case fan on */
   
   // Set up the LEDs
   pinMode(ONBOARD_LED_OUTPUT, OUTPUT);
@@ -344,6 +357,14 @@ void handleSerial()
               rcvCommand = readFan;
               rcvState = commandReceived;
               break;
+            case 'D': // read drum motor status
+              rcvCommand = readDrum;
+              rcvState = commandReceived;
+              break;
+            case 'A': // read case fan status
+              rcvCommand = readCaseFan;
+              rcvState = commandReceived;
+              break;
             default:
               Serial.print(unknownCommand);
               clearState();
@@ -389,6 +410,30 @@ void handleSerial()
                 rcvState = digit1;
               }
               break;
+            case '+':
+              rcvCommand = setDrum;
+              drumMotor = on;
+              digitalWrite(DRUM_MOTOR, LOW); /* drum motor on (active low) */
+              rcvState = commandReceived;
+              break;
+            case '-':
+              rcvCommand = setDrum;
+              drumMotor = off;
+              digitalWrite(DRUM_MOTOR, HIGH); /* drum motor off */
+              rcvState = commandReceived;
+              break;
+            case '^':
+              rcvCommand = setCaseFan;
+              caseFan = on;
+              digitalWrite(CASE_FAN, LOW); /* case fan on (active low) */
+              rcvState = commandReceived;
+              break;
+            case '#':
+              rcvCommand = setCaseFan;
+              caseFan = off;
+              digitalWrite(CASE_FAN, HIGH); /* case fan off */
+              rcvState = commandReceived;
+              break;              
             default:
               Serial.print(unknownCommand);
               clearState();
@@ -539,7 +584,29 @@ void sendResponse()
       if(fan < 100) Serial.print("0"); // take care of leading zeros
       if(fan < 10) Serial.print("0");    
       Serial.print((double)fan,0);
-      break;  
+      break; 
+    case setDrum:
+    case readDrum:
+      if(drumMotor == on)
+      {
+        Serial.print("+");
+      }
+      else
+      {
+        Serial.print("-");
+      }
+      break;
+    case setCaseFan:
+    case readCaseFan:
+      if(caseFan == on)
+      {
+        Serial.print("^");
+      }
+      else
+      {
+        Serial.print("#");
+      }
+      break;      
     default:
       Serial.print("U");  // Unknown command
       break;
