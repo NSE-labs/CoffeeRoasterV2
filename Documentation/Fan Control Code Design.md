@@ -22,7 +22,7 @@ The triac circuit is connected to the processor as follows:
 |Trigger Triac|Output|D9|PB1|Timer/Counter1 output compare match A output (OC1A)|
 | | | | | |
 
-Timer 1 is initialized as followslisted in the following table. Please refer to the [ATmega328 datasheet](https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7810-Automotive-Microcontrollers-ATmega328P_Datasheet.pdf) for a thorough description of the Timer 1 registers.
+Timer 1 is initialized as listed in the following table. Please refer to the [ATmega328 datasheet](https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7810-Automotive-Microcontrollers-ATmega328P_Datasheet.pdf) for a thorough description of the Timer 1 registers.
 |Register|Value|Setting|
 |-|-|-|
 |TCCR1A|B01000000|Trigger Triac (OC1A) signal toggles on comparator match, timer set to normal counting mode (not PWM). The initialization code also ensures that the OC1A output signal is initialized to zero (logic low).|
