@@ -23,7 +23,7 @@
 #define MAX6675_CS_OUTPUT 6
 #define MAX6675_CLK_OUTPUT 7
 #define FAN_TRIAC_OUTPUT 9
-#define HEATER_TRIAC_OUTPUT 10
+#define HEATER_SSR_OUTPUT 10
 #define MANUAL_LED_OUTPUT 11
 #define COMPUTER_LED_OUTPUT 12
 #define ONBOARD_LED_OUTPUT 13
@@ -111,22 +111,7 @@ long lastDisplayUpdateTime = 0; // last time display was updated
 
 #define TRIGGER_PULSE_COUNT 80  // The triac trigger must stay high for this number of timer1 counts (40 uS)
 
-// Map power output (0-100%)to timer counts for triac firing
-unsigned int heaterMap[101] = 
-{ 
-  0xffff,14734,14219,13851,13555,13301,13077,12875,12688,12515,
-  12352,12198,12053,11913,11779,11650,11525,11404,11287,11173, 
-  11062,10953,10847,10743,10640,10540,10441,10344,10248,10154,
-  10060,9968,9877,9786,9697,9608,9520,9433,9346,9260,
-  9174,9089,9004,8920,8835,8751,8668,8584,8501,8417,
-  8334,8251,8167,8084,8000,7916,7832,7748,7664,7579,
-  7494,7408,7322,7235,7148,7060,6971,6881,6791,6700,
-  6608,6514,6420,6324,6226,6128,6027,5925,5821,5714,
-  5606,5495,5380,5263,5143,5018,4889,4755,4616,4469,
-  4313,4153,3980,3794,3591,3367,3113,2817,2450,1933,
-  50
-};
-
+// Map setting (0-100%)to timer counts for triac firing
 unsigned int fanMap[101] = 
 { 
   0xffff,9600,9599,9596,9593,9588,9583,9577,9569,9561,
@@ -153,9 +138,6 @@ void setup()
   // start serial port at 115200 bps:
   Serial.begin(115200);
   
-  // start the I2C display interface and put some text on the screen
-  initializeDisplay();
-   
   // Initialize drum motor and case fan outputs - NOTE: they are active low
   pinMode(DRUM_MOTOR, OUTPUT); 
   digitalWrite(DRUM_MOTOR, HIGH); /* drum motor off */
@@ -180,23 +162,26 @@ void setup()
   
   // Wait for MAX 6675 to stabilize
   delay(500);
+
+  pinMode(HEATER_SSR_OUTPUT, OUTPUT);  // Set the heater solid state relay pin to output
   
-  // Set up Timer 1
+  // Set up Timer 1 for triac control of the fan
   TIMSK1 = B00000000;  //No interrupts enabled
-  TCCR1A = B10100000;  //Both comparator output pins set to zero on comparator match, timer set to Normal mode
+  TCCR1A = B10000000;  //OC1A output pin set to zero on comparator match, timer set to Normal mode
   TCCR1B = B00000010;  //No capture filtering, timer set to Normal mode, use clk/8 prescaler 
-  OCR1A = 0xffff;  // Set the compare registers to their maximum values
-  OCR1B = 0xffff;  // Set the compare registers to their maximum values
+  OCR1A = 0xffff;  // Set the compare register to its maximum value
   TCNT1 = 0;  //Set the timer count to zero
-  TCCR1C = B10000000;  //Force a compare match on comparator A to set the outputs to zero
-  TCCR1C = B01000000;  //Force a compare match on comparator B to set the outputs to zero
-  TIMSK1 = B00000110;  //Compare A and Compare B interrupts enabled
-  pinMode(HEATER_TRIAC_OUTPUT, OUTPUT);  // Set the heater triac trigger pin to output
+  TCCR1C = B10000000;  //Force a compare match on comparator A to set the output to zero
+  TIMSK1 = B00000010;  //Compare A and Compare B interrupts enabled
   pinMode(FAN_TRIAC_OUTPUT, OUTPUT);  // Set the fan triac trigger pin to output
-  TCCR1A = B01010000;  //Both comparator output pins toggle on comparator match, timer set to Normal mode
+  TCCR1A = B01000000;  //Comparator A output pin toggles on comparator match, timer set to Normal mode
+
 
   // Set up the zero crossing interrupt
   attachInterrupt(0, zeroCrossingInterrupt, FALLING);
+
+  // start the I2C display interface and put some text on the screen
+  initializeDisplay();
 }
 
 // Interrupt service routine for zero crossing detection
@@ -205,7 +190,6 @@ void zeroCrossingInterrupt()
   TCNT1 = 0;  //Set the timer count to zero
    
   // Set the counter compare registers based on the heater and fan settings
-  OCR1B = heaterMap[heater];
   OCR1A = fanMap[currentFanOutput];
 }
 
@@ -218,17 +202,6 @@ ISR(TIMER1_COMPA_vect)
   while((TCNT1 - start) < TRIGGER_PULSE_COUNT); // Wait for the required trigger time for the triac
   
   TCCR1C = B10000000;  // Force a compare match on channel A to toggle the output pin to zero
-}
-
-// Interrupt service routine for comparator B match
-ISR(TIMER1_COMPB_vect)
-{
-  unsigned int start;
-  
-  start = TCNT1;  // Read the current timer value
-  while((TCNT1 - start) < TRIGGER_PULSE_COUNT); // Wait for the required trigger time for the triac
-  
-  TCCR1C = B01000000;  // Force a compare match on channel B to toggle the output pin to zero
 }
 
 void loop() 
