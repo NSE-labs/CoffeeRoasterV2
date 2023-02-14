@@ -109,6 +109,9 @@ long lastTempSampleTime = 0;  // last time the temperature was sampled
 #define DISPLAY_UPDATE_PERIOD 100 // how long between display updates in milliseconds
 long lastDisplayUpdateTime = 0; // last time display was updated
 
+#define HEATER_CYCLE_TIME 5000 // In milliseconds. The heater will be turned on for a percentage of this time
+long lastHeaterCycleTime = 0; // and off for the remainder of this time, based on the heater % setting.
+
 #define TRIGGER_PULSE_COUNT 80  // The triac trigger must stay high for this number of timer1 counts (40 uS)
 
 // Map setting (0-100%)to timer counts for triac firing
@@ -207,8 +210,8 @@ ISR(TIMER1_COMPA_vect)
 void loop() 
 { 
   long currentMillis;
+  int heaterOnTime;
   int analogValue;
-  
 
   if(controlMode == manual)
   {
@@ -245,7 +248,7 @@ void loop()
   // deal with any commands from the PC
   if (Serial.available() >  0) handleSerial();  
   
-    // update the fan output every FAN_UPDATE_INTERVAL milliseconds
+  // update the fan output every FAN_UPDATE_INTERVAL milliseconds
   if((currentMillis - lastFanUpdateTime) > FAN_UPDATE_INTERVAL) 
   {
     lastFanUpdateTime = currentMillis;
@@ -259,6 +262,23 @@ void loop()
     {
       currentFanOutput -= 1;
     }
+  }
+
+  // Heater Proportional Control
+  // cycle the heater every HEATER_CYCLE_TIME milliseconds
+  if((currentMillis - lastHeaterCycleTime) > HEATER_CYCLE_TIME) 
+  {
+    lastHeaterCycleTime = currentMillis;
+    heaterOnTime = (HEATER_CYCLE_TIME * heater)/100;
+  }
+
+  if((currentMillis - lastHeaterCycleTime) < heaterOnTime)
+  { /* heater is on during the first part of the cycle */
+    digitalWrite(HEATER_SSR_OUTPUT, HIGH);
+  }
+  else
+  { /* heater is off during the second part of the cycle */
+    digitalWrite(HEATER_SSR_OUTPUT, LOW);
   }
   
   if(currentMillis > 3000)
