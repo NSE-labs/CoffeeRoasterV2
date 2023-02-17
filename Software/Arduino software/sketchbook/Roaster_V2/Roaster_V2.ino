@@ -217,10 +217,16 @@ void loop()
   {
     // Read the front panel control knobs
     analogValue = analogRead(HEATER_CONTROL_POT);
-    heater = map(analogValue, 1023,0, 0, 100);
+    // With the longer cables to the front panel on V2 hardware, there is a slight voltage 
+    // sag near the maximum A/D value (1023 = +5 V). Make sure that the pot can go all the
+    // way to 100%. Also, in V1 hardware the pots were wired so that +5V = 0% and 0V = 100%.
+    // This is changed in V2 hardware so that +5V = 100% and 0V = 0%.
+    if(analogValue > 1003) analogValue = 1023; // compensate for any voltage sag
+    heater = map(analogValue, 0, 1023, 0, 100);
 
     analogValue = analogRead(FAN_CONTROL_POT);
-    fan = map(analogValue, 1023, 0, 0, 100);
+    if(analogValue > 1003) analogValue = 1023; // compensate for any voltage sag
+    fan = map(analogValue, 0, 1023, 0, 100);
   }    
     
   currentMillis = millis();
