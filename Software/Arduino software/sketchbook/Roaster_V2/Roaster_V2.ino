@@ -213,24 +213,37 @@ void loop()
   int heaterOnTime;
   int analogValue;
 
+  currentMillis = millis();
+
   if(controlMode == manual)
   {
-    // Read the front panel control knobs
-    analogValue = analogRead(HEATER_CONTROL_POT);
+    // Read the front panel control knobs - heater and fan controls
     // With the longer cables to the front panel on V2 hardware, there is a slight voltage 
     // sag near the maximum A/D value (1023 = +5 V). Make sure that the pot can go all the
-    // way to 100%. Also, in V1 hardware the pots were wired so that +5V = 0% and 0V = 100%.
+    // way to 100% by treating all A/D counts above a threshold as 100%. 
+    // Also, in V1 hardware the pots were wired so that +5V = 0% and 0V = 100%.
     // This is changed in V2 hardware so that +5V = 100% and 0V = 0%.
+    
+    analogValue = analogRead(HEATER_CONTROL_POT);
     if(analogValue > 1003) analogValue = 1023; // compensate for any voltage sag
     heater = map(analogValue, 0, 1023, 0, 100);
 
     analogValue = analogRead(FAN_CONTROL_POT);
     if(analogValue > 1003) analogValue = 1023; // compensate for any voltage sag
     fan = map(analogValue, 0, 1023, 0, 100);
+
+    // While in manual mode, if the heater is turned on then start the drum 
+    // rotating. This allows operation of the roaster even if the external
+    // computer fails (otherwise we are dependent on serial commands to start
+    // the drum rotating). The heater is considered turned on if the setting
+    // is greater than 2%. This prevents noise from turning on the drum.
+    if((heater > 2) && (drumMotor == off))
+    {
+      drumMotor = on;
+      digitalWrite(DRUM_MOTOR, LOW); /* drum motor on (active low) */
+    }
   }    
     
-  currentMillis = millis();
-  
   // read the temperature every TEMP_SAMPLE_PERIOD
   if((currentMillis - lastTempSampleTime) > TEMP_SAMPLE_PERIOD) 
   {
